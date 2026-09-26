@@ -31,3 +31,4 @@
 - faculty@campusevent.com / password
 - student@campusevent.com / password
 - volunteer@campusevent.com / password
+"# new-project" 
