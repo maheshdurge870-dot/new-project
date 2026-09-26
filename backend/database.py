@@ -14,6 +14,11 @@ SQLALCHEMY_DATABASE_URL = os.getenv(
     "sqlite:///./campusevent.sqlite3"  # SQLite fallback for local dev without Supabase
 )
 
+# SQLAlchemy 2.x dropped support for the legacy 'postgres://' prefix.
+# Render and some other providers still use it — fix it automatically.
+if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 # Only pass check_same_thread if using SQLite
 connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
 
