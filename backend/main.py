@@ -85,22 +85,29 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 
 @app.on_event("startup")
 def populate_mock_data():
-    db = next(get_db())
-    if not db.query(models.User).first():
-        users = [
-            models.User(email="admin@campusevent.com", name="Admin User", hashed_password=get_password_hash("password"), role="ADMIN"),
-            models.User(email="faculty@campusevent.com", name="Faculty User", hashed_password=get_password_hash("password"), role="FACULTY"),
-            models.User(email="student@campusevent.com", name="Student User", hashed_password=get_password_hash("password"), role="STUDENT"),
-            models.User(email="volunteer@campusevent.com", name="Volunteer User", hashed_password=get_password_hash("password"), role="VOLUNTEER"),
-        ]
-        db.add_all(users)
-        
-        programs = [
-            models.Program(title="AI & Machine Learning Workshop", description="Learn AI basics.", category="Workshop", date="2026-10-15", time="10:00", venue="Main Auditorium", organizer="CS Dept", seats=100),
-            models.Program(title="Web Development Bootcamp", description="React & Vite.", category="Technical", date="2026-10-20", time="09:00", venue="Lab 1", organizer="IT Dept", seats=50),
-        ]
-        db.add_all(programs)
-        db.commit()
+    try:
+        db = next(get_db())
+        if not db.query(models.User).first():
+            users = [
+                models.User(email="admin@campusevent.com", name="Admin User", hashed_password=get_password_hash("password"), role="ADMIN"),
+                models.User(email="faculty@campusevent.com", name="Faculty User", hashed_password=get_password_hash("password"), role="FACULTY"),
+                models.User(email="student@campusevent.com", name="Student User", hashed_password=get_password_hash("password"), role="STUDENT"),
+                models.User(email="volunteer@campusevent.com", name="Volunteer User", hashed_password=get_password_hash("password"), role="VOLUNTEER"),
+            ]
+            db.add_all(users)
+
+            programs = [
+                models.Program(title="AI & Machine Learning Workshop", description="Learn AI basics.", category="Workshop", date="2026-10-15", time="10:00", venue="Main Auditorium", organizer="CS Dept", seats=100),
+                models.Program(title="Web Development Bootcamp", description="React & Vite.", category="Technical", date="2026-10-20", time="09:00", venue="Lab 1", organizer="IT Dept", seats=50),
+            ]
+            db.add_all(programs)
+            db.commit()
+            print("[DB] Mock data seeded successfully.")
+        else:
+            print("[DB] Data already exists, skipping seed.")
+    except Exception as e:
+        print(f"[DB] WARNING: Could not seed mock data — {e}")
+        print("[DB] Server is running. Fix DATABASE_URL env var to enable DB.")
 
 @app.post("/auth/login", response_model=schemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
